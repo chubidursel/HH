@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-// npx hardhat run --network goerli deployment/deployUSDT.ts
+// npx hardhat run --network goerli deployment/deployDemo.ts
 
 async function main() {
   console.log("Start Deploying....")
