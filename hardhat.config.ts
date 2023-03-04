@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
   networks: {
     goerli: {                             // `${process.env.ALCHEMY_API}`
       url: `${process.env.ALCHEMY_API}`, //url: `https://goerli.infura.io/v3/${process.env.INFURA_RINKEBY}`, 
-      accounts: [`${process.env.PRIVATE_KEY}`]
+      accounts: [`${process.env.PRIVATE_KEY_2}`]
     },
     mumbai: {
       url: `${process.env.POLYGON_ALCHEMY_URL}`,

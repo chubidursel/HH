@@ -7,12 +7,12 @@ import { ethers } from "hardhat";
 async function main() {
   console.log("Starting 🏃")
 
-  const newNumber = 15;
+  const newNumber = 88;
 
   const [deployer] = await ethers.getSigners();
   console.log("👷 Account: ", deployer.address)
   const bal =  await deployer.getBalance()
-  console.log("👷 Account Balance: ", bal.toString())
+  console.log("👷 Account Balance: ", ethers.utils.formatUnits(bal, "ether"))
 
   const contract = await ethers.getContractAt("Demo", '0x2D63E91B3f70ca00F892874B114d173718a78643')
 
@@ -35,10 +35,10 @@ async function main() {
 
   //const options = { gasPrice: 1000000000, gasLimit: 85000, nonce: 45, value: 0 }
   const options = {gasPrice: gasPrice, gasLimit: gasLimit}
-  const tx = await contract.setNum(newNumber, options); // 1st => 43768
+  const tx = await contract.setNum(newNumber, options); 
   console.log("📈 TX1: ", tx);
 
-  const txres = await tx.wait();
+  const txres = await tx.wait(1);
   console.log("📈 TX after wait(): ", txres)
 
   const res2 = await contract.num();
