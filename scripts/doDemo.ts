@@ -30,6 +30,10 @@ async function main() {
   console.log("📄🦊 transactionFee in ether: " + ethers.utils.formatUnits(amountOfEthToPay, "ether"));
 
 
+  // const ethPrice = 1500
+  // const ethPaid = Number(ethers.utils.formatUnits(amountOfEthToPay, "ether")) * ethPrice;
+  // console.log(" ⛽ GAS ($$$ paid)", ethPaid)
+
   const res = await contract.num();
   console.log("Num: ", res)
 
