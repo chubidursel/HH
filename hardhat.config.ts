@@ -33,15 +33,20 @@ const config: HardhatUserConfig = {
     arbitrum : {
       url: `${process.env.ARBITRUM_RPC}`,
       accounts:  [`${process.env.PRIVATE_KEY}`]
-    }
+    },
+    sepolia : {
+      url: `${process.env.ALCHEMY_SEPOLIA}`,
+      accounts:  [`${process.env.PRIVATE_KEY_DADDY}`]
+    },
   },
     etherscan: {
       // ETH => process.env.ETHERSCAN_VERIFY
       // POLYGON => process.env.POLYGON_VERIFY
       // BSC => process.env.BSC_VERIFY
       // ARBITRUM => process.env.ARBITRUM_VERIFY
-      apiKey: process.env.ETHERSCAN_VERIFY,  
+      apiKey: process.env.ARBITRUM_VERIFY,  
     },
+
 };
 
 export default config;

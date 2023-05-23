@@ -1,13 +1,13 @@
 import { ethers } from "hardhat";
 
-// npx hardhat run --network goerli deployment/deployDemo.ts
+// npx hardhat run --network sepolia deployment/deployDemo.ts
 
 async function main() {
   console.log("Start Deploying....")
 
   const [deployer] = await ethers.getSigners();
 
-  const Contract = await ethers.getContractFactory("Demo");
+  const Contract = await ethers.getContractFactory("ZkEasyNFT");
   const contract = await Contract.deploy();
 
   await contract.deployed();

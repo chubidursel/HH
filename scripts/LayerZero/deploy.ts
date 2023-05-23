@@ -1,92 +1,39 @@
 import { ethers } from "hardhat";
 
 // npx hardhat clean && npx hardhat compile
-// npx hardhat run --network goerli scripts/doDemo.ts
-  //const p = new ethers.providers.InfuraProvider("goerli");
-  // (await p.getGasPrice()).toString()
-// async function main() {
-//   console.log("Starting 🏃")
+// npx hardhat run --network goerli scripts/LayerZero/deploy.ts
+// npx hardhat run --network arbitrum scripts/LayerZero/deploy.ts
 
-//   const newNumber = 88;
-
-//   const [deployer] = await ethers.getSigners();
-//   console.log("👷 Account: ", deployer.address)
-//   const bal =  await deployer.getBalance()
-//   console.log("👷 Account Balance: ", ethers.utils.formatUnits(bal, "ether"))
-
-//   const contract = await ethers.getContractAt("Demo", '0x2D63E91B3f70ca00F892874B114d173718a78643')
-
-//   const gasPrice = await deployer.getGasPrice()
-//   console.log("📄 getGasPrice(): ", gasPrice)
-
-//   // const dataGasFee = await ethers.provider.getFeeData();
-//   // console.log("📄 getFeeData(): ", dataGasFee)
-
-//   const gasLimit = await contract.estimateGas.setNum(newNumber)
-//   console.log("📄 estimateGas.setNum(77): ", gasLimit)
-
-//   const amountOfEthToPay = gasPrice.mul(gasLimit);
-//   console.log("📄🦊 transactionFee in wei: " + amountOfEthToPay.toString());
-//   console.log("📄🦊 transactionFee in ether: " + ethers.utils.formatUnits(amountOfEthToPay, "ether"));
-
-
-//   // const ethPrice = 1500
-//   // const ethPaid = Number(ethers.utils.formatUnits(amountOfEthToPay, "ether")) * ethPrice;
-//   // console.log(" ⛽ GAS ($$$ paid)", ethPaid)
-
-//   const res = await contract.num();
-//   console.log("Num: ", res)
-
-//   //const options = { gasPrice: 1000000000, gasLimit: 85000, nonce: 45, value: 0 }
-//   const options = {gasPrice: gasPrice, gasLimit: gasLimit}
-//   const tx = await contract.setNum(newNumber, options); 
-//   console.log("📈 TX1: ", tx);
-
-//   const txres = await tx.wait(1);
-//   console.log("📈 TX after wait(): ", txres)
-
-//   const res2 = await contract.num();
-//   console.log("NUm: ", res2)
-
-//   console.log("👷 WEI spent: ", (await deployer.getBalance()).sub(bal))
-//   console.log("👷 ETH spent: ", ethers.utils.formatUnits(((await deployer.getBalance()).sub(bal)), "ether") )
-
-//   console.log(`🏁 FINISHED 🏁`);
-// }
-
+// npx hardhat verify --network goerli 0x21Ab01f3753638Dd00234dc15F0E854A9405b501 0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23
+// npx hardhat verify --network arbitrum 0xaEF0b5C36BD8Ac88b424a3810cC8E1EB5350B25A 0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab
 async function main() {
   console.log("Starting 🏃")
-  const Demo = await ethers.getContractFactory("Demo");
 
-    const [deployer] = await ethers.getSigners();
-    console.log("👷 Account: ", deployer.address)
-    const gasPrice = await deployer.getGasPrice()
-    console.log("📄 getGasPrice(): ", gasPrice)
-   
 
-    // FROM CHAT_GPT
-    // Please note that the actual gas used during deployment may be lower than the specified gasLimit 
-    // if the contract's constructor or deployment operations require less gas. Any unused gas will be refunded to the sender.
+  // Arbitrum -> chainId: 10143   endpoint: 0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab
+  // GOERLI -> chainId: 10121   endpoint: 0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23
 
-  const demo = await Demo.deploy(
+  const [deployer] = await ethers.getSigners();
+  console.log("👷 Account: ", deployer.address)
+  const gasPrice = await deployer.getGasPrice()
+  console.log("📄 getGasPrice(): ", gasPrice)
+
+
+  const LayerZeroDemo1 = await ethers.getContractFactory("LayerZeroDemo1");
+  const layerZeroDemo1 = await LayerZeroDemo1.deploy(
+    "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",
     {
-      gasPrice: gasPrice, // Set the desired gas price here
-      // maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei"), // Set the desired maxPriorityFeePerGas here
+      gasPrice: gasPrice, 
     }
-  )
-  
-  const tx = await demo.deployed();
+  );
 
-  const transaction = await demo.deployTransaction.wait();
-  const gasUsed = transaction.gasUsed;
+  //
 
+  const tx = await layerZeroDemo1.deployed();
+  console.log(tx)
 
-  console.log('$$$$ Gas used:', gasUsed.toString());
-  const transactionCost = gasUsed.mul(gasPrice);
-  console.log("Transaction cost in Ether:", ethers.utils.formatEther(transactionCost));
-  
-// BASIC -> Gas used: 425582
-// 
+  console.log("🏁🏁layerZeroDemo1 deployed to:", layerZeroDemo1.address);
+
 
   console.log(`🏁 FINISHED 🏁`);
 }

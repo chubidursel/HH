@@ -12,8 +12,8 @@ npx hardhat run --network bsc scripts/deployLib.ts  🧧
 npx hardhat run --network arbitrum deployment/deployDemo.ts 2️⃣
 
 
-npx hardhat verify --network goerli 0x6eBC5cB48E3A1AE646fA3d3C6911c393493Bb797 "Nike" 0x98162D17D4d15c945B7418475EdEb4d9c0335684
-npx hardhat verify --network goerli 0x2D63E91B3f70ca00F892874B114d173718a78643
+npx hardhat verify --network goerli 0x21Ab01f3753638Dd00234dc15F0E854A9405b501 "Nike" 0x98162D17D4d15c945B7418475EdEb4d9c0335684
+npx hardhat verify --network sepolia 0x5A5F1EdF98d33532e45C34dDADCA37C77a4b53A8
 npx hardhat verify --network mumbai 0xEAD30D869927e0f370376FD283688bd87284ac4b  👳
 npx hardhat verify --network bsc 0xA1E854B80cBC58A3960904113C0d43c8B193a24f  🧧
 npx hardhat verify --network arbitrum 0xAB30a2c2e88Ad7984fc2F85B701CEa63e86087a3  2️⃣
