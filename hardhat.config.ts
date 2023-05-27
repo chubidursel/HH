@@ -10,12 +10,12 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.17",
-    // settings: {
-    //   optimizer: {
-    //     enabled: true,
-    //     runs: 200
-    //   }
-    // }
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
   },
   networks: {
     goerli: {                             // `${process.env.ALCHEMY_API}`
@@ -24,7 +24,7 @@ const config: HardhatUserConfig = {
     },
     mumbai: {
       url: `${process.env.POLYGON_ALCHEMY_URL}`,
-      accounts:  [`${process.env.PRIVATE_KEY}`]
+      accounts:  [`${process.env.PRIVATE_KEY_DADDY}`]
     },
     bsc: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
@@ -42,9 +42,9 @@ const config: HardhatUserConfig = {
     etherscan: {
       // ETH => process.env.ETHERSCAN_VERIFY
       // POLYGON => process.env.POLYGON_VERIFY
+      apiKey: process.env.POLYGON_VERIFY, 
       // BSC => process.env.BSC_VERIFY
-      // ARBITRUM => process.env.ARBITRUM_VERIFY
-      apiKey: process.env.ARBITRUM_VERIFY,  
+     // apiKey: process.env.ARBITRUM_VERIFY,  
     },
 
 };

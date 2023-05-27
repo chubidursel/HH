@@ -1,40 +1,32 @@
 import { ethers } from "hardhat";
 
 // npx hardhat clean && npx hardhat compile
-// npx hardhat run --network goerli scripts/LayerZero/deploy.ts
-// npx hardhat run --network arbitrum scripts/LayerZero/deploy.ts
-
-// npx hardhat verify --network goerli 0x21Ab01f3753638Dd00234dc15F0E854A9405b501 0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23
-// npx hardhat verify --network arbitrum 0xaEF0b5C36BD8Ac88b424a3810cC8E1EB5350B25A 0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab
+// npx hardhat run --network mumbai scripts/LayerZero/deployLZ.ts
+ 
 async function main() {
   console.log("Starting 🏃")
 
+  const Demo = await ethers.getContractFactory("ZkEasyNFT");
 
-  // Arbitrum -> chainId: 10143   endpoint: 0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab
-  // GOERLI -> chainId: 10121   endpoint: 0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23
+    const [deployer] = await ethers.getSigners();
+    console.log("👷 Account: ", deployer.address)
+    const gasPrice = await deployer.getGasPrice()
+    console.log("📄 getGasPrice(): ", gasPrice)
+   
+// POLYGON -> "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8" || chainId: 10109
+  const demo = await Demo.deploy("0xf69186dfBa60DdB133E91E9A4B5673624293d8F8")
+  
+  const tx = await demo.deployed();
 
-  const [deployer] = await ethers.getSigners();
-  console.log("👷 Account: ", deployer.address)
-  const gasPrice = await deployer.getGasPrice()
-  console.log("📄 getGasPrice(): ", gasPrice)
-
-
-  const LayerZeroDemo1 = await ethers.getContractFactory("LayerZeroDemo1");
-  const layerZeroDemo1 = await LayerZeroDemo1.deploy(
-    "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab",
-    {
-      gasPrice: gasPrice, 
-    }
-  );
-
-  //
-
-  const tx = await layerZeroDemo1.deployed();
-  console.log(tx)
-
-  console.log("🏁🏁layerZeroDemo1 deployed to:", layerZeroDemo1.address);
+  const transaction = await demo.deployTransaction.wait();
+  const gasUsed = transaction.gasUsed;
 
 
+  console.log('$$$$ Gas used:', gasUsed.toString());
+  const transactionCost = gasUsed.mul(gasPrice);
+  console.log("Transaction cost in Ether:", ethers.utils.formatEther(transactionCost));
+
+  console.log('SC ADDRESS -> ', demo.address);
   console.log(`🏁 FINISHED 🏁`);
 }
 
