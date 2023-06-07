@@ -9,7 +9,6 @@ async function main() {
 
   const [deployer, acc1, acc2, acc3, acc4, acc5, acc6, admin] = await ethers.getSigners();
 
-
   const Contract = await ethers.getContractFactory("ZkEasyWallet");
   const contractWallet = await Contract.deploy([acc1.address, acc2.address, acc3.address], [20, 30, 50]);
 
@@ -19,46 +18,101 @@ async function main() {
 
 
   console.log()
-  console.log("💥💥💥💥 TEST #1 Withdraw Ether 💥💥💥💥 ")
+  console.log("💥💥💥💥 TEST #2 Add User 💥💥💥💥 ")
 
   await deployer.sendTransaction({
     to: contractWallet.address,
     value: 100
   });
 
-  console.log("📄Total shares: ", await contractWallet.totalShares())
-  console.log("📄Total released: ", await contractWallet.totalReleased())
-  console.log("📄user #1 share: ", (await contractWallet.users(acc1.address)).share)
-  console.log("📄user #1 Releaed: ", (await contractWallet.users(acc1.address)).releasedAmount)
-
-  await contractWallet.connect(acc1).release();
+  // console.log("📄Total shares: ", await contractWallet.totalShares())
+  // console.log("📄Total released: ", await contractWallet.totalReleased())
+  console.log("📄user #1 INFO: ", (await contractWallet.users(acc1.address)))
   console.log("📦 SC balance:  ", await contractWallet.getBalanceETH())
   console.log("👨 User releasable:  ", await contractWallet.releasable(acc1.address))
 
+  await contractWallet.connect(acc1).release();
+  console.log("✅ RELEASED!!!")
+
+  console.log("#############  PROB  ###############")
+  console.log("📦 SC balance:  ", await contractWallet.getBalanceETH())
+  console.log("📦 Total release:  ", await contractWallet.totalReleased())
+  console.log("👨 User releasable:  ", await contractWallet.releasable(acc1.address))
+
+
   await deployer.sendTransaction({
     to: contractWallet.address,
     value: 100
   });
-
+  console.log("💸 + 100 WEI")
+  
+  console.log("👨 User releasable:  ", await contractWallet.releasable(acc1.address))
+  console.log("👨 User2 releasable:  ", await contractWallet.releasable(acc2.address))
+  
   
   await contractWallet.connect(acc1).release();
 
-  console.log("💸 WITHDRAW #2")
-  console.log("📦 SC balance: ", await contractWallet.getBalanceETH())
-  console.log("👨 User releasable:  ", await contractWallet.releasable(acc1.address))
+  console.log("📄user #1 INFO: ", (await contractWallet.users(acc1.address)))
 
-  await deployer.sendTransaction({
-    to: contractWallet.address,
-    value: 100
-  });
 
+  console.log()
+  console.log("💥💥💥💥 TEST #2 Add user 💥💥💥💥 ")
+
+  console.log("📦 Users Amount: ", await contractWallet.amountUsers())
+
+  console.log("Active Proposal: ", await contractWallet.ACTIVE_VOTING())
+  console.log("CounterID: ", await contractWallet.ProposalCounter())
+  await contractWallet.connect(acc2).createProposal(acc4.address, true, 1, 10)
+
+  console.log("✅ Proposal has been created! Status: ", await contractWallet.ACTIVE_VOTING())
+  await contractWallet.connect(acc2).vote(1, true)
+  console.log("✅ Voted! Status: ", await contractWallet.proposals(1))
+  console.log("Quorum reached?: : ", await contractWallet.quorumReached(1))
+  await contractWallet.connect(acc3).vote(1, true)
+  console.log("✅ Voted! Status: ", await contractWallet.proposals(1))
+  console.log("Quorum reached?: : ", await contractWallet.quorumReached(1))
+
+
+  const blockTimestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+  await ethers.provider.send("evm_mine", [blockTimestamp + 86400]); // <- 10 sec
+  console.log("Wait 1 day ...")
+
+  await contractWallet.connect(acc3).executeProposal(1);
+
+  console.log("✅ EXECUTED! Status: ", await contractWallet.proposals(1))
+  console.log("📦 Users Amount: ", await contractWallet.amountUsers())
+  console.log("📦 Users Amount: ", await contractWallet.totalShares())
+
+
+  console.log()
+  console.log("💥💥💥💥 TEST #3 Delete User 💥💥💥💥 ")
+
+  console.log("Active Proposal: ", await contractWallet.ACTIVE_VOTING())
+  console.log("CounterID: ", await contractWallet.ProposalCounter())
+
+  await contractWallet.connect(acc4).createProposal(acc4.address, false, 1, 0)
+
+  console.log("✅ Proposal has been created! Status: ", await contractWallet.ACTIVE_VOTING(), await contractWallet.ProposalCounter())
   
-  await contractWallet.connect(acc1).release();
+// VOTING---------------------
 
-  console.log("💸 WITHDRAW #3")
-  console.log("📦 SC balance: ", await contractWallet.getBalanceETH())
-  console.log("👨 User releasable:  ", await contractWallet.releasable(acc1.address))
+await contractWallet.connect(acc2).vote(2, true)
+//console.log("✅ Voted! Status: ", await contractWallet.proposals(2))
+console.log("Quorum reached?: : ", await contractWallet.quorumReached(2))
+await contractWallet.connect(acc3).vote(2, true)
+//console.log("✅ Voted! Status: ", await contractWallet.proposals(2))
+console.log("Quorum reached?: : ", await contractWallet.quorumReached(2))
 
+
+const blockTimestamp2 = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+await ethers.provider.send("evm_mine", [blockTimestamp2 + 86400]); // <- 10 sec
+console.log("Wait 1 day ...")
+
+await contractWallet.connect(acc3).executeProposal(2);
+
+console.log("✅ EXECUTED! Status: ", await contractWallet.proposals(2))
+console.log("📦 Users Amount: ", await contractWallet.amountUsers())
+console.log("📦 Users Amount: ", await contractWallet.totalShares())
 
   console.log(`🏁 FINISHED 🏁`);
 }
@@ -70,83 +124,3 @@ main().catch((error) => {
 });
 
 
-
-
-
-//---------------- USEFUL CODE --------------
-
-
- // function sleep(milliseconds : number) {
-  //   const date = Date.now();
-  //   let currentDate = null;
-  //   do {
-  //     currentDate = Date.now();
-  //   } while (currentDate - date < milliseconds);
-  // }
-  // sleep(5000)
-
-      //----------------- EVENTS --------------
-// console.log("📢 EVENTS")
-// //const eventsAll = await contract.queryFilter("*" as any, 0,  (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;)
-// const blockNumber = await ethers.provider.getBlockNumber();
-
-// // Get all events from the contract from block 0 to the latest block
-// const eventsAddEmployee = await contract.queryFilter(
-//   contract.filters["AddEmployee(address,uint256)"](),
-//   0,
-//   blockNumber
-// );
-// console.log("Amount Evetns: ", eventsAddEmployee.length)
-
-
-// const eventsStartStream = await contract.queryFilter(
-//   contract.filters.StreamCreated(),
-//   0,
-//   blockNumber
-// );
-
-// console.log("Stream Created Evetns: ", eventsStartStream[0].args)
-
-// // let eventFilterFinish = contract.filters["StreamFinished(address,uint256,uint256)"];
-// // let eventsFinishStream = await contractFactory.queryFilter(eventFilterFinish);
-// // console.log("📢 EVENTS FINISH: ", eventsFinishStream.length)
-
-
-  //----------------- EVENTS --------------
-// console.log("📢 EVENTS" ,  contract.filters.AddEmployee())
-// contractUSDT.on("Transfer", (to, amount, from) => {
-//   console.log("📢🟡 EVENTS", to, amount, from);
-// });
-
-//----------------- INFO --------------
-// const info1 = await contract.totalAmountEmployee();
-// const info2 = await contract.allEmployee(acc1.address);
-// console.log("📄 INFO [ amount employee ] ➡️  ", info1.toString())
-// console.log("📄 INFO [ info employee #1 ] ➡️  ", info2.flowRate)
-
-// const infoToken1 = await contractUSDT.balanceOf(deployer.address);
-// console.log("📄🟡 INFO [ Balance ] ➡️  ", infoToken1.toString())
-
-// console.log("📄📕 INFO [ blocknumber ] ➡️  ",  await ethers.provider.getBlockNumber())
-// console.log("📄📕 INFO [ acc1 = eth ] ➡️  ",  await ethers.provider.getBalance(deployer.address))
-// console.log("📄📕 INFO [ gas price ] ➡️  ",  ethers.utils.formatEther(await ethers.provider.getGasPrice()), "gwei")
-
-
-// ????????? CALCULATE token limit to add new Employee
-// const totalAmountEmployees = (await contract.amountEmployee()).toNumber();
-// const cRrate = (await contract.commonRateAllEmployee()).toNumber();
-// const hoursLimit = (await contract.hoursLimitToAddNewEmployee()).toNumber();
-// const res = (totalAmountEmployees + 1 ) * (cRrate + 10) * hoursLimit;
-//     console.log(`📈 Calculation Math to add new employee:  ${totalAmountEmployees + 1} * ${cRrate + 10} * ${hoursLimit} = ${res} `)
-// // ????????? CALCULATE token limit to Stream All 
-//console.log("---------📈 BUFFER INFO 📈------------")
-// const totalAmountEmployees2 = (await contract.amountEmployee()).toNumber();
-// const cRrate2 = (await contract.commonRateAllEmployee()).toNumber();
-// const hoursLimit2 = (await contract.hoursLimitToAddNewEmployee()).toNumber();
-// const res2 = totalAmountEmployees2 * cRrate2 * hoursLimit2;
-
-// const scBal2 = (await contract.balanceContract()).toNumber();
-// console.log(`📈 Calculation Math to add new employee:  ${totalAmountEmployees2} * ${cRrate2} * ${hoursLimit2} = ${res2} `)
-// console.log("📈Valid TO ADD // Balance: ", scBal2)
-// console.log("📈 Can I add new Employee ", (scBal2 > res2))
-// console.log("📈 Time different", (scBal2 - res2))

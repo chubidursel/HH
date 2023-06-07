@@ -8,7 +8,6 @@ contract ZkEasyWallet {
     event NewProposal(address who, uint256 when);
     event Voted(address who, uint256 when, bool votedYes);
 
-
     constructor(address[] memory payees, uint256[] memory shares_) payable {
         require(payees.length == shares_.length, "PaymentSplitter: payees and shares length mismatch");
         require(payees.length > 0, "PaymentSplitter: no payees");
@@ -30,7 +29,6 @@ contract ZkEasyWallet {
         _;
     }
 
-
     mapping(address => User) public users;
     address[] public userAddresses;
 
@@ -38,27 +36,35 @@ contract ZkEasyWallet {
     uint256 public totalReleased;
 
     function release() external onlyUser {
-        
-        uint256 unreleasedAmount = releasable(msg.sender);
 
-        uint256 amountToRelease = unreleasedAmount - users[msg.sender].releasedAmount;
+        uint256 payment = releasable(msg.sender);
 
-        require(amountToRelease != 0, "Account is not due payment");
+        require(payment != 0, "Account is not due payment");
 
-        users[msg.sender].releasedAmount += amountToRelease;  // Increment the released amount
+        unchecked {
+            users[msg.sender].releasedAmount += payment;  
+        }
+        totalReleased += payment;
 
-        totalReleased += amountToRelease;
+        payable(msg.sender).transfer(payment);
 
-        payable(msg.sender).transfer(amountToRelease);
-
-        emit EtherReleased(msg.sender, amountToRelease);
+        emit EtherReleased(msg.sender, payment);
     }
 
-    function releasable(address user) public view returns (uint256) {
-        uint256 additionalFunds = address(this).balance - totalReleased;
-        uint256 updatedUnreleasedAmount = (users[user].share * additionalFunds) / totalShares;
-        return updatedUnreleasedAmount + users[user].releasedAmount;
+
+    function releasable(address account) public view returns (uint256) {
+        uint256 totalReceived = address(this).balance + totalReleased;
+        return _pendingPayment(account, totalReceived, users[account].releasedAmount);
     }
+    function _pendingPayment(
+        address account,
+        uint256 totalReceived,
+        uint256 alreadyReleased
+    ) private view returns (uint256) {
+        return (totalReceived * users[account].share) / totalShares - alreadyReleased;
+    }
+
+
 
     function getBalanceETH() public view returns(uint256){
         return address(this).balance;
@@ -71,9 +77,9 @@ contract ZkEasyWallet {
         address proposer;
         address userAddress;
         uint userShare;
-        uint256 votingPower;
         bool isAdd; //add or delete
         bool executed;
+        uint amountVotesShares; // depends voter share;
         uint256 up;
         uint256 down;
         uint256 endTime;
@@ -89,21 +95,19 @@ contract ZkEasyWallet {
     uint256 public quorumThreshold = 70;
     uint256 public minVotePeriod = 1 days;
 
-    function createProposal(address _userAddress, bool _isAdd, uint256 endTimeDays, uint _userShare) external onlyUser {
-        //require(users[_userAddress].share == 0, "User already exists");
-        require(ACTIVE_VOTING, "Only one voting allowed");
-        //require(proposals[ProposalCounter].endTime == 0, "A proposal for this user already exists");
-
-        // uint256 votingPower = users[msg.sender].share; ?? 
+    function createProposal(address _userAddress, bool _isAdd, uint256 endTimeHours, uint _userShare) external onlyUser {
+        require(!ACTIVE_VOTING, "Only one voting allowed");
 
         Proposal storage newProposal = proposals[ProposalCounter];
         newProposal.proposer =  msg.sender;
         newProposal.isAdd = _isAdd;
         if(_isAdd)  newProposal.userShare = _userShare;
         newProposal.userAddress = _userAddress;
-        newProposal.endTime = block.timestamp + endTimeDays * 86400;
+        newProposal.endTime = block.timestamp + endTimeHours * 1 hours;
        
         ProposalCounter ++;
+
+        ACTIVE_VOTING = true;
 
         emit NewProposal(msg.sender, block.timestamp);
      }
@@ -111,18 +115,19 @@ contract ZkEasyWallet {
     function vote(uint32 _id, bool _approve) external onlyUser(){
         Proposal storage p = proposals[_id];
         require(p.endTime > 0, "No proposal exists for this user");
-         require(!proposals[_id].voted[msg.sender], "You have already voted on this Proposal");
+        require(!proposals[_id].voted[msg.sender], "You have already voted on this Proposal");
 
         p.voted[msg.sender] = true;
+
+        p.amountVotesShares += users[msg.sender].share;
 
         if (_approve) {
            p.up++;
         } else {
            p.down++;
         }
-    emit Voted(msg.sender, block.timestamp, _approve);
+         emit Voted(msg.sender, block.timestamp, _approve);
     }
-
 
     function executeProposal(uint32 _id) external onlyUser {
         Proposal storage p = proposals[_id];
@@ -130,12 +135,7 @@ contract ZkEasyWallet {
         require(!p.executed, "Proposal has already been executed");
         require(block.timestamp >= p.endTime, "Proposal has not yet ended");
 
-        uint256 totalVotes = p.up + p.down;
-        uint256 minVotes = (totalShares * quorumThreshold) / 100;
-        
-        bool quorumReached = (totalVotes >= minVotes);
-   
-        if (quorumReached) {
+        if (quorumReached(_id)) {
             if (p.isAdd) {
                 _addUser(p.userAddress, p.userShare);
             } else {
@@ -144,13 +144,20 @@ contract ZkEasyWallet {
         }
 
         p.executed = true;
+
+         ACTIVE_VOTING = false;
     }
 
+    function quorumReached(uint32 _id) public view returns(bool){
+
+        uint256 minVotes = (totalShares * quorumThreshold) / 100;
+
+         return proposals[_id].amountVotesShares >= minVotes;
+     }
+
 // ----------------------- ADD or DELETE -------------------------
-        function _addUser(address _user, uint256 _share) private {
+    function _addUser(address _user, uint256 _share) private {
         require(_user != address(0), "Invalid user address");
-        // require(_share > 0, "Invalid share value");
-        // require(users[_user].share == 0, "User already exists");
 
         users[_user].share = _share;
         userAddresses.push(_user);
@@ -172,5 +179,9 @@ contract ZkEasyWallet {
                 break;
             }
         }
+    }
+
+    function amountUsers()public view returns(uint){
+        return userAddresses.length;
     }
 }
