@@ -1,7 +1,9 @@
 import { ethers } from "hardhat";
 
 // npx hardhat clean && npx hardhat compile
-// npx hardhat run --network goerli scripts/doDemo.ts
+// npx hardhat run --network siberium scripts/doDemo.ts
+
+
   //const p = new ethers.providers.InfuraProvider("goerli");
   // (await p.getGasPrice()).toString()
 // async function main() {

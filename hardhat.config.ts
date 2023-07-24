@@ -38,6 +38,14 @@ const config: HardhatUserConfig = {
       url: `${process.env.ALCHEMY_SEPOLIA}`,
       accounts:  [`${process.env.PRIVATE_KEY_DADDY}`]
     },
+    siberium : {
+      url: 'https://rpc.test.siberium.net/',
+      accounts:  [`${process.env.PRIVATE_KEY}`]
+    },
+    opBnb : {
+      url: 'https://opbnb-testnet-rpc.bnbchain.org/',
+      accounts:  [`${process.env.PRIVATE_KEY_DADDY}`]
+    },
   },
     etherscan: {
       // ETH => process.env.ETHERSCAN_VERIFY

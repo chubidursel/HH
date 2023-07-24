@@ -1,19 +1,26 @@
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
 
-// npx hardhat run --network sepolia deployment/deployDemo.ts
+// npx hardhat run --network opBnb deployment/deployDemo.ts
 
 async function main() {
   console.log("Start Deploying....")
 
   const [deployer] = await ethers.getSigners();
 
-  const Contract = await ethers.getContractFactory("ZkEasyNFT");
+  const Contract = await ethers.getContractFactory("Demo");
   const contract = await Contract.deploy();
 
-  await contract.deployed();
+  const contractDeployed = await contract.deployed();
 
   console.log("👨 The owner of smart contract is: ", deployer.address);
   console.log(`🔥 SC Deployed! Address: ${contract.address}`);
+
+  await contractDeployed.deployTransaction.wait(5)
+  console.log("✅ Verifying smart contract...")
+  await run("verify:verify", {
+      address: contract.address
+  })
+  console.log("DONE!")
 }
 
 

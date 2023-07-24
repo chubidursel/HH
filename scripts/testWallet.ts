@@ -37,6 +37,8 @@ async function main() {
   console.log("#############  PROB  ###############")
   console.log("📦 SC balance:  ", await contractWallet.getBalanceETH())
   console.log("📦 Total release:  ", await contractWallet.totalReleased())
+
+  
   console.log("👨 User releasable:  ", await contractWallet.releasable(acc1.address))
 
 
