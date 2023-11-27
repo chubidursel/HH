@@ -50,7 +50,7 @@ const config: HardhatUserConfig = {
     etherscan: {
       // ETH => process.env.ETHERSCAN_VERIFY
       // POLYGON => process.env.POLYGON_VERIFY
-      apiKey: process.env.POLYGON_VERIFY, 
+      apiKey: process.env.ETHERSCAN_VERIFY, 
       // BSC => process.env.BSC_VERIFY
      // apiKey: process.env.ARBITRUM_VERIFY,  
     },
